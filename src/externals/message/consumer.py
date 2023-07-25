@@ -2,12 +2,10 @@ import os
 import pika
 import dotenv
 
-from .config import RabbitmqConfig
-
 dotenv.load_dotenv('.env')
 
 
-class RabbitmqConsumer(RabbitmqConfig):
+class RabbitmqConsumer:
 
     def __init__(self) -> None:
         connection_params = pika.ConnectionParameters(
