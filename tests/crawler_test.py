@@ -2,12 +2,12 @@ import pytest
 from src.crawler.browser import Browser
 
 PORTAL_URL = 'http://extratoclube.com.br/'
-PORTAL_LOGIN = 'konsi'
-PORTAL_PASSWORD = 'konsi'
+PORTAL_LOGIN = 'konsiteste2'
+PORTAL_PASSWORD = 'konsiteste2'
 
 @pytest.fixture(scope="session")
 def browser():
-    b = Browser()
+    b = Browser(hedless=False)
     b.start()
     return b
 
@@ -39,27 +39,56 @@ def test_login_portal(browser: Browser):
 
     assert status_code == 200
 
-def test_login_invalid_portal(browser: Browser):
+def test_close_modal(browser: Browser):
     page = browser.page
-    
-    page.goto(PORTAL_URL)
 
     page.wait_for_load_state('networkidle')
 
     frame = page.frames[1]
+
+    frame.wait_for_selector('#main')
     
-    input_user = frame.query_selector('#user')
-    input_user.fill('invalid_user')
+    btn_close_modal = frame.query_selector('ion-button[title="Fechar"]')
+    btn_close_modal.click()
 
-    input_password = frame.query_selector('#pass')
-    input_password.fill('invalid_password')
+def test_close_menu(browser: Browser):
+    page = browser.page
+
+    page.wait_for_load_state('networkidle')
+
+    frame = page.frames[1]
+
+    menu = frame.locator('ion-menu[menu-id="first"]')
+
+    menu.click()
     
-    with page.expect_response('http://extratoblubeapp-env.eba-mvegshhd.sa-east-1.elasticbeanstalk.com/login') as res:
-        btn_logar = frame.query_selector('#botao')
-        btn_logar.click()
+def test_extract_benefit(browser: Browser):
+    page = browser.page
 
-    status_code = res.value.status
+    page.wait_for_load_state('networkidle')
 
-    assert status_code == 401
+    frame = page.frames[1]
+
+    frame.wait_for_selector('xpath=//*[@id="extratoonline"]/ion-row[2]/ion-col/ion-card')
+
+    btn_beneficio = frame.locator(
+        'xpath=//*[@id="extratoonline"]/ion-row[2]/ion-col/ion-card/ion-button[16]')
+    btn_beneficio.click()
+
+    input_beneficio = frame.locator(
+        'xpath=//*[@id="extratoonline"]/ion-row[2]/ion-col/ion-card/ion-grid/ion-row[2]/ion-col/ion-card/ion-item/ion-input/input')
+    input_beneficio.fill('033.355.888-00')
+    
+    page.keyboard.press('Tab', delay=1000)
+
+    page.keyboard.press('Enter', delay=1000)
+
+
+
+
+
+    
+
+    
 
     
