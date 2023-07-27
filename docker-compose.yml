@@ -1,16 +1,38 @@
 version: '3'
 services:
-    cache:
-      image: redis
-      container_name: 'redis'
-      restart: always
-      ports:
-        - 6379:6379
-      command: redis-server --save 20 1 --loglevel warning --requirepass eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81
+  cache:
+    image: redis
+    container_name: 'redis'
+    restart: always
+    ports:
+      - 6379:6379
+    command: redis-server --save 20 1 --loglevel warning --requirepass eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81
 
-    rabbitmq:
-      image: rabbitmq:3-management-alpine
-      container_name: 'rabbitmq-server'
-      ports:
-          - 5672:5672
-          - 15672:15672
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: 'rabbitmq-server'
+    ports:
+      - 5672:5672
+      - 15672:15672
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.5.2
+    container_name: elastisearch
+    restart: always
+    volumes:
+      - elastic_data:/usr/share/elasticsearch/data/
+    ports:
+      - 9200:9200
+      - 9300:9300
+    environment:
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    networks:
+      - elk
+      
+volumes:
+  elastic_data: {}
+
+networks:
+  elk:
+    driver: bridge
