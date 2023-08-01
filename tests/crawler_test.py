@@ -7,7 +7,7 @@ PORTAL_PASSWORD = 'konsiteste2'
 
 @pytest.fixture(scope="session")
 def browser():
-    b = Browser(headless=False)
+    b = Browser(headless=True)
     b.start()
     return b
 

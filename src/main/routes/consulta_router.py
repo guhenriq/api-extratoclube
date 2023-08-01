@@ -1,6 +1,6 @@
-import json
 from fastapi import APIRouter
 from fastapi.responses import JSONResponse
+from celery import chain
 from src.main.schemas import schemas
 from src.externals.message import tasks
 
@@ -9,11 +9,16 @@ router = APIRouter()
 @router.post('/solicitacao-matricula')
 def solicitacao_matricula(data: schemas.ConsultaMatriculaSchema):
 
-    result = tasks.get_benefit.delay(data.cpfCliente, data.loginPortal, data.senhaPortal)
+    workflow = chain(
+        tasks.verify_cached_data.s(data.cpfCliente),
+        tasks.extract_data.s(username=data.loginPortal, password=data.senhaPortal),
+        tasks.save_in_cache.s(),
+        tasks.index_data.s()
+    ).apply_async()
 
     data = {
         'message': 'solicitação recebida', 
-        'id_solicitacao': result.id
+        'id_solicitacao': workflow.id
     }
 
     return JSONResponse(content=data, status_code=201)
