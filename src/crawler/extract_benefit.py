@@ -72,9 +72,8 @@ class ExtractBenefit:
 
         frame.wait_for_selector('xpath=//*[@id="extratoonline"]/ion-row[2]/ion-col/ion-card')
 
-        btn_beneficio = frame.locator(
-            'xpath=//*[@id="extratoonline"]/ion-row[2]/ion-col/ion-card/ion-button[16]')
-        btn_beneficio.click()
+        button_beneficio = frame.get_by_text('Encontrar Benefícios de um CPF')
+        button_beneficio.click()
 
         input_beneficio = frame.locator(
             'xpath=//*[@id="extratoonline"]/ion-row[2]/ion-col/ion-card/ion-grid/ion-row[2]/ion-col/ion-card/ion-item/ion-input/input')
@@ -82,6 +81,16 @@ class ExtractBenefit:
         
         page.keyboard.press('Tab', delay=1000)
 
-        page.keyboard.press('Enter', delay=1000)
+        with page.expect_response('*'):
+            page.keyboard.press('Enter', delay=1000)
+
+        item = frame.evaluate(""" () => {
+                var item = document.querySelectorAll(".item.md.ion-focusable.hydrated.item-label");
+                var matricula = item[0].querySelector('ion-label').innerText;
+                return matricula
+            }   
+        """)
+
+        return item
 
 

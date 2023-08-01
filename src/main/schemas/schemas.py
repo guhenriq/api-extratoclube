@@ -4,4 +4,3 @@ class ConsultaMatriculaSchema(BaseModel):
     cpfCliente: str
     loginPortal: str
     senhaPortal: str
-    
