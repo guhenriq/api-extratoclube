@@ -1,12 +1,63 @@
 version: '3'
 services:
-  cache:
+
+  api:
+    build:
+      context: .
+    image: extratoclube:latest
+    container_name: backend
+    ports:
+      - 8000:8000
+    volumes:
+      - .:/app
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_USER=default
+      - REDIS_PASSWORD=eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81
+      - MESSAGE_BROKER_URL=amqp://guest@rabbitmq:5672/
+      - MESSAGE_BACKEND_URL=redis://:eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81@redis:6379/0
+      - ELASTICSEARCH_URL=http://elasticsearch:9200/
+    depends_on:
+      - redis
+      - rabbitmq
+      - elasticsearch
+    networks:
+      - elk
+
+  worker:
+    build: 
+      context: .
+    image: extratoclube:latest
+    container_name: worker
+    volumes:
+      - .:/app
+    command: celery -A src.externals.message.tasks worker --loglevel=info
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_USER=default
+      - REDIS_PASSWORD=eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81
+      - MESSAGE_BROKER_URL=amqp://guest@rabbitmq:5672/
+      - MESSAGE_BACKEND_URL=redis://:eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81@redis:6379/0
+      - ELASTICSEARCH_URL=http://elasticsearch:9200/
+    depends_on:
+      - redis
+      - rabbitmq
+      - elasticsearch
+      - api
+    networks:
+      - elk
+
+  redis:
     image: redis
     container_name: 'redis'
-    restart: always
     ports:
       - 6379:6379
     command: redis-server --save 20 1 --loglevel warning --requirepass eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81
+    networks:
+      - elk
 
   rabbitmq:
     image: rabbitmq:3-management-alpine
@@ -14,6 +65,8 @@ services:
     ports:
       - 5672:5672
       - 15672:15672
+    networks:
+      - elk
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.17.8
