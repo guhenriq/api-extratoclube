@@ -28,11 +28,14 @@ def extract_data(arg: any, username: str, password: str):
     browser = Browser(headless=True)
     extract_benefit = ExtractBenefit(browser)
     
-    matriculas = extract_benefit.execute(arg, username, password)
+    response = extract_benefit.execute(arg, username, password)
+
+    if 'msg' in response:
+        return response
 
     data = {
         'cpf': arg,
-        'matriculas': [matriculas]
+        'matriculas': [response]
     }
 
     return data
@@ -40,6 +43,9 @@ def extract_data(arg: any, username: str, password: str):
 @app.task
 def save_in_cache(data: any):
     if isinstance(data, bytes):
+        return data
+    
+    if 'msg' in data:
         return data
     
     cache_db = RedisDatabaseConnection()
@@ -54,6 +60,9 @@ def save_in_cache(data: any):
 def index_data(data: any):
     if isinstance(data, bytes):
         return json.loads(data)
+    
+    if 'msg' in data:
+        return data
     
     es = ElasticConnection()
     es_conn = es.get_connection()
