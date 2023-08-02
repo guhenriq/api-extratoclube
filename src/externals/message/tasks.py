@@ -1,7 +1,7 @@
 import json
 from .config import MessageConfig
 from src.externals.cache.database import RedisDatabaseConnection
-from src.externals.elasticsearch import es as elastic
+from src.externals.elasticsearch import ElasticConnection
 from src.crawler import Browser, ExtractBenefit
 
 message_config = MessageConfig(name_app='tasks')
@@ -55,7 +55,10 @@ def index_data(data: any):
     if isinstance(data, bytes):
         return json.loads(data)
     
-    elastic.index(index='matriculas', id=data['cpf'], document=data)
+    es = ElasticConnection()
+    es_conn = es.get_connection()
+    
+    es_conn.index(index='matriculas', id=data['cpf'], document=data)
 
     return data
     

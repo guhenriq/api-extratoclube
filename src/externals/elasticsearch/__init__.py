@@ -1,1 +1,1 @@
-from .elastic_search import es
+from .elastic_search import ElasticConnection
