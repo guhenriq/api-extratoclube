@@ -10,7 +10,7 @@ class ElasticConnection:
     def __init__(self) -> None:
         self.__connection_url = os.getenv('ELASTICSEARCH_URL')
 
-    def get_connection(self):
+    def get_connection(self) -> Elasticsearch:
         es = Elasticsearch([self.__connection_url])
         return es
 
