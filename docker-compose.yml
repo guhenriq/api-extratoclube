@@ -1,9 +1,19 @@
 version: '3'
 services:
 
+  frontend:
+    build: 
+      context: /frontend/.
+    image: extratoclube-frontend:latest
+    container_name: frontend
+    ports:
+      - 3000:3000
+    networks:
+      - elk
+
   api:
     build:
-      context: .
+      context: /backend/.
     image: extratoclube:latest
     container_name: backend
     ports:
@@ -28,7 +38,7 @@ services:
 
   worker:
     build: 
-      context: .
+      context: /backend/.
     image: extratoclube:latest
     container_name: worker
     volumes:
