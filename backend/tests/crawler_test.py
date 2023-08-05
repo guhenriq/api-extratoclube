@@ -71,6 +71,9 @@ def test_extract_benefit(browser: Browser):
 
     frame.wait_for_selector('xpath=//*[@id="extratoonline"]/ion-row[2]/ion-col/ion-card')
 
+    btn_active = frame.locator('ion-button[color="warning"]')
+    btn_active.click()
+
     button_beneficio = frame.get_by_text('Encontrar Benefícios de um CPF')
     button_beneficio.click()
 
@@ -89,7 +92,7 @@ def test_extract_benefit(browser: Browser):
             return matricula
         }   
     """)
-
+    
     assert item == '6012629862'
 
     
